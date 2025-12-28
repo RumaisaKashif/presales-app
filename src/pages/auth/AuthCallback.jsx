@@ -7,38 +7,74 @@ const AuthCallback = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const verify = async () => {
-      const params = new URLSearchParams(window.location.search);
-      const token_hash = params.get('token_hash');
-      const type = params.get('type');
+    const handleAuth = async () => {
+      // Supabase puts tokens in the URL hash (after #), not query params
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = hashParams.get('access_token');
+      const refreshToken = hashParams.get('refresh_token');
 
-      if (!token_hash) {
-        setError('Invalid authentication link');
+      // Also check query params as fallback (for email OTP verification)
+      const queryParams = new URLSearchParams(window.location.search);
+      const token_hash = queryParams.get('token_hash');
+      const type = queryParams.get('type');
+
+      // Method 1: Hash contains tokens (auto-verified by Supabase)
+      if (accessToken && refreshToken) {
+        const { error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+
+        if (error) {
+          setError(error.message);
+          return;
+        }
+
+        navigate('/presales/dashboard', { replace: true });
         return;
       }
 
-      const { error } = await supabase.auth.verifyOtp({
-        token_hash,
-        type: type || 'email',
-      });
+      // Method 2: Query params contain token_hash (needs verification)
+      if (token_hash) {
+        const { error } = await supabase.auth.verifyOtp({
+          token_hash,
+          type: type || 'email',
+        });
 
-      if (error) {
-        setError(error.message);
+        if (error) {
+          setError(error.message);
+          return;
+        }
+
+        navigate('/presales/dashboard', { replace: true });
         return;
       }
 
-      // Clean URL + redirect
-      window.history.replaceState({}, document.title, '/presales/dashboard');
-      navigate('/presales/dashboard', { replace: true });
+      // No tokens found - let Supabase handle it automatically
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        setError(sessionError.message);
+        return;
+      }
+
+      if (session) {
+        navigate('/presales/dashboard', { replace: true });
+      } else {
+        setError('Invalid or expired authentication link');
+      }
     };
 
-    verify();
+    handleAuth();
   }, [navigate]);
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center flex-col gap-4">
         <p className="text-red-600">{error}</p>
+        <a href="/login" className="text-purple-600 hover:underline">
+          Back to Login
+        </a>
       </div>
     );
   }

@@ -67,10 +67,22 @@ export const AuthProvider = ({ children }) => {
     return () => subscription?.unsubscribe();
   }, []);
 
+  const login = async (email) => {
+    await authService.login(email);
+  };
+
+  const register = async (email, fullName) => {
+    await authService.register(email, fullName);
+  };
+
+  const logout = async () => {
+    await authService.logout();
+  };
+
   if (loading) return <FullPageLoader />;
 
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider value={{ user, loading , login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -103,7 +103,7 @@ const Register = () => {
       <form onSubmit={handleSubmit}>
         <Input label="Name" value={name} onChange={e => setName(e.target.value)} />
         <Input label="Email" value={email} onChange={e => setEmail(e.target.value)} />
-        <Button>Create account</Button>
+        <Button type="submit">Create account</Button>
       </form>
       <Link to="/login">Login</Link>
     </AuthLayout>
