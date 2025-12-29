@@ -79,7 +79,7 @@ export const AuthProvider = ({ children }) => {
     await authService.logout();
   };
 
-  if (loading) return <FullPageLoader />;
+  // if (loading) return <FullPageLoader />;
 
   return (
     <AuthContext.Provider value={{ user, loading , login, register, logout }}>

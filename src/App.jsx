@@ -97,13 +97,13 @@ function App() {
 
       {/* Protected Application Routes */}
       <Route path="/presales" element={<ProtectedRoute />}>
-        <Route element={<MainLayout />}>
+        {/* <Route element={<MainLayout />}> */}
           <Route path="dashboard" element={<PresalesDashboard />} />
           <Route path="documents" element={<DocumentationRepository />} />
           <Route path="uploaddocument" element={<UploadDocument />} />
           <Route path="proposal" element={<GenerateProposal />} />
           <Route path="settings" element={<Settings />} />
-        </Route>
+        {/* </Route> */}
       </Route>
 
       {/* Default redirect */}
